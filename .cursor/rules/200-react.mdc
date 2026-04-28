@@ -1,0 +1,16 @@
+---
+description: React / TypeScript / TSX conventions
+globs:
+  - "**/*.tsx"
+  - "**/*.ts"
+alwaysApply: false
+---
+
+## React / TypeScript conventions
+
+Replace this with your React-specific conventions. Examples:
+
+- Use functional components with hooks
+- Prefer composition over inheritance
+- Keep components under 200 lines
+- Co-locate tests with components

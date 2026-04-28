@@ -1,0 +1,20 @@
+{
+    "$schema": "https://www.schemastore.org/package.json",
+    "name": "claude-cursor-coordinator",
+    "version": "1.0.0",
+    "description": "Coordination system for Claude + Cursor working on the same codebase. Commit attribution, drift prevention, audit trail.",
+    "private": false,
+    "type": "module",
+    "packageManager": "bun@1.3.11",
+    "scripts": {
+        "gen:rules": "bun scripts/gen-rules.ts",
+        "prepare": "husky",
+        "status": "bun scripts/status.ts",
+        "sync": "git fetch origin && git status -sb && echo '--- recent commits ---' && git log --since='1 day ago' --oneline -n 30 && echo '--- working tree state ---' && git diff --stat",
+        "test": "node --test scripts/tests/*.test.mjs && bun test scripts/tests/gen-rules.test.ts",
+        "whodid": "bun scripts/whodid.ts"
+    },
+    "devDependencies": {
+        "husky": "^9.1.7"
+    }
+}

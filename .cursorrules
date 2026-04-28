@@ -1,0 +1,97 @@
+# AGENTS.md
+
+This is the canonical hand-edited rules file for both Cursor and Claude Code (and any other AI builder following the [agents.md](https://agents.md/) standard).
+
+CLAUDE.md, .cursorrules, and .cursor/rules/*.mdc are GENERATED from this file by `bun gen:rules` (runs in pre-commit hook). Edit AGENTS.md, never the generated outputs.
+
+---
+
+## Project context
+
+Replace this section with a one-paragraph description of your project: what it does, who it serves, what stack it uses.
+
+Example: "FlipTheCrate is a music sample licensing marketplace built with Laravel 13 + Inertia + React 19 + Bun, deployed to Forge + DigitalOcean."
+
+## General coding standards
+
+Replace these with your project's standards:
+
+- Use descriptive names for variables and methods
+- Match existing code style and patterns in sibling files
+- Don't change dependencies without approval
+- Test every change
+
+## Canonical examples
+
+When writing a new component or pattern, copy from a reference. See `docs/CANONICAL_EXAMPLES.md` for the full list.
+
+
+
+
+
+
+
+<!--
+  Add more @scope blocks as needed. Supported defaults: php, react, python, ruby, coordination.
+  For other scopes, edit scripts/gen-rules.ts to add globs and priority.
+-->
+
+## COORDINATION scope
+
+## Coordination protocol (Claude + Cursor)
+
+This repo has TWO AI builders working on it: Claude (via Claude Code CLI) and Cursor (via Agent / Cloud Agents). Follow this protocol on every task.
+
+### Before any task
+
+1. Read `.coordination/HANDOFF.md` for explicit "don't touch X" notes
+2. Read last 10 lines of `.coordination/recent.jsonl` to see what the other tool committed recently
+3. If writing a new component, read `docs/CANONICAL_EXAMPLES.md` first
+
+### Branch lane defaults
+
+- Cursor: commit to `main` for small fixes (single-file, typo, formatting, sub-50-line tweaks)
+- Claude: feature branch + PR for everything else (multi-file, new features, refactors, schema changes)
+- Override allowed but explicit ("Cursor, do this on a branch")
+
+### Attribution (mandatory)
+
+Every commit must end with one of these trailers:
+- `Co-authored-by: Cursor <cursoragent@cursor.com>` (Cursor adds automatically; Settings > Agents > Attribution)
+- `Co-authored-by: Claude <noreply@anthropic.com>` (Claude Code via `.claude/settings.json`)
+
+Husky `commit-msg` hook rejects commits without one. GitHub Action `trailer-guard` enforces server-side.
+
+### Mid-session AGENTS.md edits
+
+If you edit `AGENTS.md` and don't immediately commit, run `bun gen:rules` so generated outputs (CLAUDE.md, .cursorrules, .cursor/rules/*.mdc) stay in sync.
+
+### Aaron's morning command
+
+```
+bun status
+```
+
+One screen: branch + uncommitted state + recent commits per tool + open PRs.
+
+## REACT scope
+
+## React / TypeScript conventions
+
+Replace this with your React-specific conventions. Examples:
+
+- Use functional components with hooks
+- Prefer composition over inheritance
+- Keep components under 200 lines
+- Co-locate tests with components
+
+## PHP scope
+
+## PHP / Laravel conventions
+
+Replace this with your PHP-specific conventions. Examples:
+
+- `declare(strict_types=1);` in all files
+- Form requests for validation, not inline
+- Services own side effects in `DB::transaction`
+- Thin controllers

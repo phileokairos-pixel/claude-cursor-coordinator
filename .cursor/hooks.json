@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "powershell.exe",
+        "args": [
+          "-NoProfile",
+          "-ExecutionPolicy", "Bypass",
+          "-File", ".cursor/hooks/sync-preflight.ps1"
+        ],
+        "timeout": 60
+      }
+    ]
+  }
+}

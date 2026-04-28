@@ -1,0 +1,10 @@
+# Subject line (50 chars ideally, conventional commit format)
+# Examples: feat(catalog): add pagination | fix(wizard): silent validation
+
+# Body: what changed and why (wrap at 72 chars)
+
+
+# Trailer: pick ONE — Cursor adds its own automatically, Claude via .claude/settings.json
+# Manual commits: keep one of these lines, delete the other
+Co-authored-by: Cursor <cursoragent@cursor.com>
+Co-authored-by: Claude <noreply@anthropic.com>

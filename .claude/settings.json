@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bun",
+        "args": ["run", "sync"]
+      }
+    ]
+  },
+  "attribution": "Co-authored-by: Claude <noreply@anthropic.com>"
+}

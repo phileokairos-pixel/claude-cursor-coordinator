@@ -1,0 +1,15 @@
+---
+description: PHP / Laravel conventions
+globs:
+  - "**/*.php"
+alwaysApply: false
+---
+
+## PHP / Laravel conventions
+
+Replace this with your PHP-specific conventions. Examples:
+
+- `declare(strict_types=1);` in all files
+- Form requests for validation, not inline
+- Services own side effects in `DB::transaction`
+- Thin controllers

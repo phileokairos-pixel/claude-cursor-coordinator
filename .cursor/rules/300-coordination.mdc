@@ -1,0 +1,40 @@
+---
+description: Coordination protocol for Claude+Cursor
+alwaysApply: true
+---
+
+## Coordination protocol (Claude + Cursor)
+
+This repo has TWO AI builders working on it: Claude (via Claude Code CLI) and Cursor (via Agent / Cloud Agents). Follow this protocol on every task.
+
+### Before any task
+
+1. Read `.coordination/HANDOFF.md` for explicit "don't touch X" notes
+2. Read last 10 lines of `.coordination/recent.jsonl` to see what the other tool committed recently
+3. If writing a new component, read `docs/CANONICAL_EXAMPLES.md` first
+
+### Branch lane defaults
+
+- Cursor: commit to `main` for small fixes (single-file, typo, formatting, sub-50-line tweaks)
+- Claude: feature branch + PR for everything else (multi-file, new features, refactors, schema changes)
+- Override allowed but explicit ("Cursor, do this on a branch")
+
+### Attribution (mandatory)
+
+Every commit must end with one of these trailers:
+- `Co-authored-by: Cursor <cursoragent@cursor.com>` (Cursor adds automatically; Settings > Agents > Attribution)
+- `Co-authored-by: Claude <noreply@anthropic.com>` (Claude Code via `.claude/settings.json`)
+
+Husky `commit-msg` hook rejects commits without one. GitHub Action `trailer-guard` enforces server-side.
+
+### Mid-session AGENTS.md edits
+
+If you edit `AGENTS.md` and don't immediately commit, run `bun gen:rules` so generated outputs (CLAUDE.md, .cursorrules, .cursor/rules/*.mdc) stay in sync.
+
+### Aaron's morning command
+
+```
+bun status
+```
+
+One screen: branch + uncommitted state + recent commits per tool + open PRs.

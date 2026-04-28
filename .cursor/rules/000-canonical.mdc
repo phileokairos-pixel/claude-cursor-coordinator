@@ -1,0 +1,42 @@
+---
+description: Canonical agent rules from AGENTS.md
+alwaysApply: true
+---
+
+# AGENTS.md
+
+This is the canonical hand-edited rules file for both Cursor and Claude Code (and any other AI builder following the [agents.md](https://agents.md/) standard).
+
+CLAUDE.md, .cursorrules, and .cursor/rules/*.mdc are GENERATED from this file by `bun gen:rules` (runs in pre-commit hook). Edit AGENTS.md, never the generated outputs.
+
+---
+
+## Project context
+
+Replace this section with a one-paragraph description of your project: what it does, who it serves, what stack it uses.
+
+Example: "FlipTheCrate is a music sample licensing marketplace built with Laravel 13 + Inertia + React 19 + Bun, deployed to Forge + DigitalOcean."
+
+## General coding standards
+
+Replace these with your project's standards:
+
+- Use descriptive names for variables and methods
+- Match existing code style and patterns in sibling files
+- Don't change dependencies without approval
+- Test every change
+
+## Canonical examples
+
+When writing a new component or pattern, copy from a reference. See `docs/CANONICAL_EXAMPLES.md` for the full list.
+
+
+
+
+
+
+
+<!--
+  Add more @scope blocks as needed. Supported defaults: php, react, python, ruby, coordination.
+  For other scopes, edit scripts/gen-rules.ts to add globs and priority.
+-->

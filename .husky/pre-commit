@@ -1,0 +1,16 @@
+# Skip on merge / rebase commits
+[ -f .git/MERGE_HEAD ] && exit 0
+
+# Regenerate rules from AGENTS.md only if AGENTS.md changed
+if git diff --cached --name-only | grep -qE '^AGENTS\.md$'; then
+  bun gen:rules
+  git add CLAUDE.md .cursorrules .cursor/rules/*.mdc
+fi
+
+# Secret scan (optional — install gitleaks for full protection)
+# scoop install gitleaks (Windows) | brew install gitleaks (macOS)
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks git --pre-commit --staged --redact --no-banner
+else
+  echo "WARNING: gitleaks not installed. Run 'scoop install gitleaks' for secret-leak protection." >&2
+fi

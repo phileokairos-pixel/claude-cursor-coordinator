@@ -1,0 +1,17 @@
+# Fetch latest from origin to detect drift
+git fetch origin --quiet
+
+LOCAL=$(git rev-parse @)
+REMOTE=$(git rev-parse @{u} 2>/dev/null || echo "$LOCAL")
+BASE=$(git merge-base @ @{u} 2>/dev/null || echo "$LOCAL")
+
+if [ "$LOCAL" != "$REMOTE" ] && [ "$REMOTE" != "$BASE" ]; then
+  echo ""
+  echo "WARNING: origin/$(git rev-parse --abbrev-ref HEAD) has new commits you have not pulled."
+  echo ""
+  git log --oneline @..@{u}
+  echo ""
+  echo "Run 'bun sync' to see what changed, then 'git pull --rebase' before pushing."
+  echo "If you really want to push without rebasing, use 'git push --no-verify'."
+  exit 1
+fi
