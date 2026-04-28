@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="topGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff7b72"/>
+      <stop offset="50%" stop-color="#a371f7"/>
+      <stop offset="100%" stop-color="#79c0ff"/>
+    </linearGradient>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#010409"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGrad)"/>
+
+  <!-- Top accent bar -->
+  <rect x="0" y="0" width="1200" height="6" fill="url(#topGrad)"/>
+
+  <!-- Title -->
+  <text x="80" y="135" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="800" font-size="72" fill="#f0f6fc" letter-spacing="-1">Claude</text>
+  <text x="335" y="135" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="300" font-size="72" fill="#a371f7">+</text>
+  <text x="395" y="135" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="800" font-size="72" fill="#f0f6fc" letter-spacing="-1">Cursor</text>
+  <text x="80" y="215" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="800" font-size="72" fill="#f0f6fc" letter-spacing="-1">Coordinator</text>
+
+  <!-- Tagline -->
+  <text x="80" y="275" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-weight="400" font-size="26" fill="#8b949e">Drop-in coordination for codebases where Claude Code and Cursor both ship code.</text>
+
+  <!-- Code block -->
+  <rect x="80" y="320" width="1040" height="200" rx="12" fill="#161b22" stroke="#30363d" stroke-width="1"/>
+
+  <!-- Window dots -->
+  <circle cx="105" cy="345" r="6" fill="#ff5f56"/>
+  <circle cx="125" cy="345" r="6" fill="#ffbd2e"/>
+  <circle cx="145" cy="345" r="6" fill="#27c93f"/>
+
+  <!-- Shell prompt -->
+  <text x="105" y="395" font-family="ui-monospace, 'Cascadia Code', 'Consolas', 'Courier New', monospace" font-size="20" fill="#7ee787">$ git commit -m "feat: add wizard"</text>
+
+  <!-- Trailer 1 -->
+  <text x="105" y="445" font-family="ui-monospace, 'Cascadia Code', 'Consolas', 'Courier New', monospace" font-size="19" fill="#e6edf3">Co-authored-by: <tspan fill="#ff7b72" font-weight="700">Cursor</tspan> &lt;cursoragent@cursor.com&gt;</text>
+
+  <!-- Trailer 2 -->
+  <text x="105" y="485" font-family="ui-monospace, 'Cascadia Code', 'Consolas', 'Courier New', monospace" font-size="19" fill="#e6edf3">Co-authored-by: <tspan fill="#79c0ff" font-weight="700">Claude</tspan> &lt;noreply@anthropic.com&gt;</text>
+
+  <!-- Footer -->
+  <text x="80" y="590" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="18" fill="#6e7681">github.com/phileokairos-pixel/claude-cursor-coordinator</text>
+  <text x="1120" y="590" text-anchor="end" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" fill="#f0f6fc" font-weight="700">@aaron.armond</text>
+</svg>
