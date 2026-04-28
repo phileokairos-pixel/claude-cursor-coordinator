@@ -1,24 +1,65 @@
+<div align="center">
+
 # Claude + Cursor Coordinator
 
-A drop-in coordination system for codebases where Claude Code and Cursor are both shipping code. Solves four real problems at once: collisions, style drift, knowledge drift, visibility.
+**Drop-in coordination for codebases where Claude Code and Cursor both ship code.**
 
-If you have both AI tools touching the same repo, they're stepping on each other right now and you don't know it. This template fixes that.
+Trailer-signed commits. Auto audit log. Single-source rules. Drift prevention.
 
-## Why this exists
+[![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
+[![AGENTS.md](https://img.shields.io/badge/AGENTS.md-compatible-blue.svg)](https://agents.md/)
+[![Made for Claude Code + Cursor](https://img.shields.io/badge/Built%20for-Claude%20Code%20%2B%20Cursor-purple.svg)](https://github.com/phileokairos-pixel/claude-cursor-coordinator)
+[![CI](https://github.com/phileokairos-pixel/claude-cursor-coordinator/actions/workflows/trailer-guard.yml/badge.svg)](https://github.com/phileokairos-pixel/claude-cursor-coordinator/actions)
 
-Real story. PocketOS had Cursor's agent on their codebase. The agent found a Railway API token in an unrelated file, ran a GraphQL `volumeDelete` call, and wiped their production database AND backups in 9 seconds. Three months of customer bookings, gone.
+</div>
 
-That's the worst case. The everyday case is worse-but-quieter: one AI commits to `main`, the other AI starts work without knowing, files diverge, code styles drift, you can't tell who shipped what when you do a retro Friday afternoon.
+---
 
-This system fixes that with three primitives:
+> **Real story.** PocketOS had Cursor's agent on their codebase. The agent found a Railway API token in an unrelated file, ran a GraphQL `volumeDelete`, and wiped their production database AND backups in 9 seconds. Three months of customer bookings, gone.
+>
+> That's the worst case. The everyday case is worse-but-quieter: one AI commits to `main`, the other AI starts work without knowing, files diverge, code styles drift, you can't tell who shipped what when you do a retro Friday afternoon.
+>
+> **This template fixes that.**
 
-1. **Every commit is signed** with `Co-authored-by: Cursor` or `Co-authored-by: Claude`. Husky rejects unsigned commits locally. GitHub Action rejects them server-side. No bypass.
-2. **Every commit gets logged** to `.coordination/recent.jsonl` automatically (post-commit hook). Both AIs read the log before starting new work.
-3. **One canonical rules file** (`AGENTS.md`) generates `CLAUDE.md`, `.cursorrules`, and `.cursor/rules/*.mdc`. Edit one file, both tools see the same rules. No more drift between Claude's instructions and Cursor's instructions.
+## Quick install
 
-Plus a few extras: `bun status` morning dashboard, `bun whodid` audit by tool, pre-push drift warning, optional gitleaks integration, `.gitmessage` template, sticky-note handoff file.
+```bash
+# Clone the template
+git clone https://github.com/phileokairos-pixel/claude-cursor-coordinator.git
 
-## What ships in this template
+# Drop the files into your repo (adjust paths to taste)
+cp -r claude-cursor-coordinator/.{husky,coordination,cursor,claude,github,gitattributes,gitmessage} your-repo/
+cp -r claude-cursor-coordinator/{scripts,docs,AGENTS.md,LICENSE} your-repo/
+
+cd your-repo
+bun install
+bun gen:rules
+bun test
+```
+
+That's it. Every commit is now trailer-signed and audit-logged. Both AIs read the log before starting new work.
+
+Full setup walkthrough: [`docs/CURSOR_USER_SETUP.md`](docs/CURSOR_USER_SETUP.md)
+
+## What it does
+
+✓ **Every commit signed** by tool — `Co-authored-by: Cursor <cursoragent@cursor.com>` or `Co-authored-by: Claude <noreply@anthropic.com>`. Husky rejects unsigned commits locally. GitHub Action rejects them server-side. No bypass.
+
+✓ **Every commit auto-logged** to `.coordination/recent.jsonl` (tool, branch, hash, subject, author). Both AIs read the log before starting new work.
+
+✓ **Single source of rules.** Edit `AGENTS.md`, and `bun gen:rules` regenerates `CLAUDE.md`, `.cursorrules`, and `.cursor/rules/*.mdc` automatically. Drift becomes structurally impossible.
+
+✓ **Branch lane discipline.** Cursor on `main` for small fixes. Claude on feature branches for multi-file work. Documented community pattern with ~40% time savings.
+
+✓ **Pre-push drift warning.** `git fetch` runs automatically; warns if `origin` is ahead before you push.
+
+✓ **Optional gitleaks integration.** Catches accidental secret leaks before they hit your remote.
+
+✓ **Morning dashboard.** `bun status` shows branch, uncommitted state, recent commits per tool, open PRs in one screen.
+
+✓ **Per-tool audit.** `bun whodid --tool=cursor` (or `--tool=claude`) shows past 7 days of work.
+
+## What ships
 
 ```
 AGENTS.md                              ← canonical hand-edited rules (industry standard)
@@ -55,50 +96,6 @@ docs/
   CURSOR_USER_SETUP.md                 ← per-machine user setup walkthrough
 ```
 
-## Quick start (3 minutes)
-
-```bash
-# 1. Clone or copy the files into your repo
-git clone https://github.com/phileokairos-pixel/claude-cursor-coordinator.git
-cd your-repo
-cp -r ../claude-cursor-coordinator/.husky .
-cp -r ../claude-cursor-coordinator/scripts .
-cp -r ../claude-cursor-coordinator/.coordination .
-cp -r ../claude-cursor-coordinator/.cursor .
-cp -r ../claude-cursor-coordinator/.claude .
-cp -r ../claude-cursor-coordinator/.github .
-cp -r ../claude-cursor-coordinator/docs .
-cp ../claude-cursor-coordinator/{.gitattributes,.gitmessage,AGENTS.md,LICENSE} .
-
-# 2. Add Husky to your package.json devDependencies + prepare script
-# (see this template's package.json for the exact format)
-
-# 3. Install
-bun install
-
-# 4. Edit AGENTS.md to match your project (replace the placeholder sections)
-
-# 5. Generate Cursor rule files
-bun gen:rules
-
-# 6. Verify everything works
-bun test
-bun status
-```
-
-After that, every commit auto-validates trailer + auto-appends to `recent.jsonl`. You'll see Cursor's commits and Claude's commits in `bun whodid`.
-
-## Per-machine setup
-
-Each contributor (you and any teammate) does this once:
-
-1. Cursor Settings → Agents → Attribution → ON
-2. Cursor Settings → Terminal → Default Profile → Git Bash (Windows only)
-3. `git config commit.template .gitmessage`
-4. Optional: `scoop install gitleaks` (or brew/manual) for secret-leak protection
-
-Full walkthrough at `docs/CURSOR_USER_SETUP.md`.
-
 ## How it works
 
 ```
@@ -122,38 +119,54 @@ Push to main → GitHub Action `trailer-guard` re-validates every commit
                                       └─ all commits valid? → green, merge allowed
 ```
 
-Both AIs read `.coordination/recent.jsonl` before starting new work — they see what the other one shipped recently and avoid stomping.
+Both AIs read `.coordination/recent.jsonl` before starting new work. They see what the other one shipped recently and avoid stomping.
 
-`AGENTS.md` is the single source of truth for project rules. The pre-commit hook regenerates `CLAUDE.md`, `.cursorrules`, and `.cursor/rules/*.mdc` from it whenever AGENTS.md changes. Drift becomes structurally impossible.
+## Per-machine setup
+
+Each contributor does this once:
+
+1. **Cursor Settings → Agents → Attribution → ON** (default since v2.4.21)
+2. **Cursor Settings → Terminal → Default Profile → Git Bash** (Windows only)
+3. **`git config commit.template .gitmessage`**
+4. **Optional**: `scoop install gitleaks` (or `brew install gitleaks`) for secret scanning
+
+Full walkthrough: [`docs/CURSOR_USER_SETUP.md`](docs/CURSOR_USER_SETUP.md)
 
 ## Customization
 
 This template ships generic. Edit:
 
-- `AGENTS.md` — replace placeholder sections with your project's actual conventions. Use `<!-- @scope: X -->` markers to scope sections to specific languages (PHP, React, Python, Ruby, or any custom scope).
-- `docs/CANONICAL_EXAMPLES.md` — replace placeholder example references with paths to YOUR canonical wizard / form / service / etc.
-- `scripts/gen-rules.ts` — if you add custom scopes, add them to the `scopeGlobs` map (line ~60) with their globs and priority.
-- `.cursor/mcp.json` — add your repo-level MCP servers (e.g., `laravel-boost`, your custom MCP).
+- **`AGENTS.md`** — replace placeholder sections with your project's actual conventions. Use `<!-- @scope: X -->` markers to scope sections to specific languages (PHP, React, Python, Ruby, or any custom scope).
+- **`docs/CANONICAL_EXAMPLES.md`** — replace placeholder example references with paths to YOUR canonical wizard / form / service / etc.
+- **`scripts/gen-rules.ts`** — if you add custom scopes, add them to the `scopeGlobs` map (line ~60) with their globs and priority.
+- **`.cursor/mcp.json`** — add your repo-level MCP servers.
 
 Don't edit:
 - `.husky/*` hook files (they call the scripts)
 - `scripts/*.mjs` and `scripts/*.ts` (the engine)
 - `.github/workflows/trailer-guard.yml` (server-side enforcement)
 
-## Background
+## Built on top of
 
-I built this because I was running Claude Code in my terminal AND Cursor in my IDE, both shipping code to my Laravel + Inertia + React startup. They started conflicting. This is the system I shipped to fix it.
+- **[AGENTS.md](https://agents.md/)** — Linux Foundation Agentic AI Foundation industry standard, native support in Codex, Copilot, Gemini, Cursor, Windsurf, Kilo Code
+- **[Husky 9](https://typicode.github.io/husky/)** — git hooks
+- **[gitleaks](https://github.com/gitleaks/gitleaks)** — optional secret scanning
+- **[Bun](https://bun.sh)** — runtime for scripts
 
-Designed and implemented in one session using subagent-driven development. The original spec, plan, and 18-commit build trail are in my private startup repo, but the entire pattern is captured here.
+## Used by
 
-## Built by
-
-[Aaron Armond Zendejas](https://instagram.com/aaron.armond) — founder, Christian, builder.
-
-Follow me on Instagram for more builder stories: **[@aaron.armond](https://instagram.com/aaron.armond)**
+This is a new template. If you adopt it, send a PR adding your project here. (Or just open an issue with a link.)
 
 ## License
 
-MIT. Use it. Fork it. Ship it. Tell other founders running Claude + Cursor about it.
+[MIT](LICENSE) — use it, fork it, ship it. If this template saves your codebase from a PocketOS-style incident, I'd love to hear about it.
 
-If this template saves your codebase from a PocketOS-style incident, I'd love to hear about it.
+---
+
+<div align="center">
+
+Built by [Aaron Armond Zendejas](https://instagram.com/aaron.armond) — founder, builder.
+
+Follow [@aaron.armond](https://instagram.com/aaron.armond) for more builder ships.
+
+</div>
