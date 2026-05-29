@@ -1,5 +1,7 @@
 # claude-cursor-coordinator Security Review (static)
 
+> **Note:** This review covers the v1.x architecture. The `post-commit` logger, `scripts/append-coordination.mjs`, and `.coordination/recent.jsonl` described below were removed in v2.0.0; activity now derives from `git log`. See CHANGELOG.md.
+
 **Date:** 2026-04-28
 **Reviewer:** Claude (static analysis)
 **Scope:**
