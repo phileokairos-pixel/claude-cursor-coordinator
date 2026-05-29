@@ -1,6 +1,6 @@
 import { strict as assert } from "node:assert";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, readFileSync, copyFileSync } from "node:fs";
+import { mkdtempSync, rmSync, readFileSync, copyFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -14,6 +14,22 @@ function setup() {
 
   copyFileSync(fixturePath, join(dir, "AGENTS.md"));
 
+  writeFileSync(join(dir, "coordinator.config.json"), JSON.stringify({
+    agents: { claude: { email: "noreply@anthropic.com", label: "Claude" }, cursor: { email: "cursoragent@cursor.com", label: "Cursor" } },
+    scopes: {
+      php:          { globs: ["**/*.php"],            priority: 100, description: "PHP / Laravel conventions" },
+      react:        { globs: ["**/*.tsx", "**/*.ts"], priority: 200, description: "React / TypeScript / TSX conventions" },
+      coordination: { alwaysApply: true,              priority: 300, description: "Coordination protocol for Claude+Cursor" },
+    },
+  }));
+
+  return dir;
+}
+
+function setupCustom(config: object, agentsMd: string) {
+  const dir = mkdtempSync(join(tmpdir(), "gen-rules-cust-"));
+  writeFileSync(join(dir, "AGENTS.md"), agentsMd);
+  writeFileSync(join(dir, "coordinator.config.json"), JSON.stringify(config));
   return dir;
 }
 
@@ -107,6 +123,35 @@ test("generates 300-coordination.mdc with alwaysApply and coordination content",
 
     assert.match(mdc, /alwaysApply: true/);
     assert.match(mdc, /Coordination protocol/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("generates .gitmessage from config agents", () => {
+  const dir = setup();
+  try {
+    runGen(dir);
+    const gitmessage = readFileSync(join(dir, ".gitmessage"), "utf8");
+    assert.match(gitmessage, /Co-authored-by: Claude <noreply@anthropic\.com>/);
+    assert.match(gitmessage, /Co-authored-by: Cursor <cursoragent@cursor\.com>/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("scope mdc globs come from config, not a hardcoded map", () => {
+  const config = {
+    agents: { claude: { email: "noreply@anthropic.com", label: "Claude" } },
+    scopes: { go: { globs: ["**/*.go"], priority: 150, description: "Go conventions" } },
+  };
+  const agentsMd = "# AGENTS\n\nCanonical.\n\n<!-- @scope: go -->\nUse gofmt.\n<!-- @endscope -->\n";
+  const dir = setupCustom(config, agentsMd);
+  try {
+    runGen(dir);
+    const mdc = readFileSync(join(dir, ".cursor/rules/150-go.mdc"), "utf8");
+    assert.match(mdc, /\*\*\/\*\.go/);
+    assert.match(mdc, /Go conventions/);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

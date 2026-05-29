@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { loadConfig } from "./lib/config.mjs";
 
 interface Section {
   scope: string;
@@ -27,7 +28,20 @@ function buildMdc(frontmatter: string, content: string): string {
   return `---\n${frontmatter}\n---\n\n${content}\n`;
 }
 
+function buildGitmessage(agents: Record<string, { email: string; label?: string }>): string {
+  const lines = Object.values(agents).map(a => `# Co-authored-by: ${a.label ?? "Agent"} <${a.email}>`);
+  return [
+    "",
+    "# <type>: <subject>   (feat|fix|docs|refactor|test|chore)",
+    "#",
+    "# Add ONE attribution trailer below (uncomment the one that applies):",
+    ...lines,
+    "",
+  ].join("\n");
+}
+
 function main() {
+  const config = loadConfig();
   const source = readFileSync("AGENTS.md", "utf8");
   const { canonical, scoped } = parseScopedSections(source);
 
@@ -36,6 +50,9 @@ function main() {
 
   // .cursorrules = full content (legacy compat)
   writeFileSync(".cursorrules", buildCanonical(canonical, scoped));
+
+  // .gitmessage = attribution trailers from config
+  writeFileSync(".gitmessage", buildGitmessage(config.agents));
 
   // .cursor/rules/*.mdc files
   mkdirSync(".cursor/rules", { recursive: true });
@@ -49,40 +66,38 @@ function main() {
     )
   );
 
-  // Generate one .mdc per scope (PHP, React, coordination, or anything else the user defines)
-  // Customize globs per scope name in this map:
-  const scopeGlobs: Record<string, { description: string; globs?: string[]; alwaysApply: boolean; priority: number }> = {
-    php: { description: "PHP / Laravel conventions", globs: ["**/*.php"], alwaysApply: false, priority: 100 },
-    react: { description: "React / TypeScript / TSX conventions", globs: ["**/*.tsx", "**/*.ts"], alwaysApply: false, priority: 200 },
-    python: { description: "Python conventions", globs: ["**/*.py"], alwaysApply: false, priority: 100 },
-    ruby: { description: "Ruby / Rails conventions", globs: ["**/*.rb"], alwaysApply: false, priority: 100 },
-    coordination: { description: "Coordination protocol for Claude+Cursor", alwaysApply: true, priority: 300 },
-  };
-
+  // Generate one .mdc per scope — sourced from config, not a hardcoded map
   for (const section of scoped) {
-    const config = scopeGlobs[section.scope] ?? {
+    const scopeConfig = config.scopes[section.scope] ?? {
       description: `${section.scope} scope`,
       alwaysApply: false,
       priority: 999,
     };
 
-    const filename = `${String(config.priority).padStart(3, "0")}-${section.scope}.mdc`;
-    const lines = [`description: ${config.description}`];
+    const priority = scopeConfig.priority ?? 999;
+    const alwaysApply = scopeConfig.alwaysApply ?? false;
+    const globs: string[] | undefined = scopeConfig.globs;
 
-    if (config.globs) {
+    const filename = `${String(priority).padStart(3, "0")}-${section.scope}.mdc`;
+    const lines = [`description: ${scopeConfig.description}`];
+
+    if (globs) {
       lines.push("globs:");
 
-      for (const g of config.globs) {
+      for (const g of globs) {
         lines.push(`  - "${g}"`);
       }
     }
 
-    lines.push(`alwaysApply: ${config.alwaysApply}`);
+    lines.push(`alwaysApply: ${alwaysApply}`);
 
     writeFileSync(`.cursor/rules/${filename}`, buildMdc(lines.join("\n"), section.content));
   }
 
-  console.log("Generated: CLAUDE.md, .cursorrules, .cursor/rules/*.mdc from AGENTS.md");
+  console.log(
+    `Generated: CLAUDE.md, .cursorrules, .gitmessage, .cursor/rules/*.mdc from AGENTS.md` +
+    ` (config: ${config._source})`
+  );
 }
 
 main();
