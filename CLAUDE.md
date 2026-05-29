@@ -33,7 +33,7 @@ This repo has TWO AI builders working on it: Claude (via Claude Code CLI) and Cu
 ### Before any task
 
 1. Read `.coordination/HANDOFF.md` for explicit "don't touch X" notes
-2. Read last 10 lines of `.coordination/recent.jsonl` to see what the other tool committed recently
+2. Run `bun status` or `bun whodid` to see recent per-tool activity (derived from git log — there is no tracked log file)
 3. If writing a new component, read `docs/CANONICAL_EXAMPLES.md` first
 
 ### Branch lane defaults
@@ -44,11 +44,11 @@ This repo has TWO AI builders working on it: Claude (via Claude Code CLI) and Cu
 
 ### Attribution (mandatory)
 
-Every commit must end with one of these trailers:
+Every commit must end with a `Co-authored-by:` trailer whose email matches an agent in `coordinator.config.json` (the single source of truth). The defaults:
 - `Co-authored-by: Cursor <cursoragent@cursor.com>` (Cursor adds automatically; Settings > Agents > Attribution)
 - `Co-authored-by: Claude <noreply@anthropic.com>` (Claude Code via `.claude/settings.json`)
 
-Husky `commit-msg` hook rejects commits without one. GitHub Action `trailer-guard` enforces server-side.
+Add more agents (Codex, Gemini, etc.) by editing `coordinator.config.json` — the `commit-msg` hook, the `trailer-guard` GitHub Action, and the generated `.gitmessage` all read from it. The trailer key is matched case-insensitively. Husky `commit-msg` rejects unknown commits locally; the `trailer-guard` Action enforces server-side.
 
 ### Mid-session AGENTS.md edits
 
@@ -86,6 +86,6 @@ Replace this with your PHP-specific conventions. Examples:
 <!-- @endscope -->
 
 <!--
-  Add more @scope blocks as needed. Supported defaults: php, react, python, ruby, coordination.
-  For other scopes, edit scripts/gen-rules.ts to add globs and priority.
+  Add more @scope blocks as needed. Configure each scope's globs and priority in
+  coordinator.config.json under "scopes". Scopes with no config entry get sensible defaults.
 -->

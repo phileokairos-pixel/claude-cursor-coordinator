@@ -4,7 +4,7 @@
 # Regenerate rules from AGENTS.md only if AGENTS.md changed
 if git diff --cached --name-only | grep -qE '^AGENTS\.md$'; then
   bun gen:rules
-  git add CLAUDE.md .cursorrules .cursor/rules/*.mdc
+  git add CLAUDE.md .cursorrules .cursor/rules/*.mdc .gitmessage
 fi
 
 # Secret scan (optional — install gitleaks for full protection)
