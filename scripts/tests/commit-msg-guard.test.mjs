@@ -126,3 +126,20 @@ test("rejects unknown trailer email even with config present", () => {
   const result = runGuardWithConfig("docs: x\n\nCo-authored-by: Nobody <nobody@example.com>\n", config);
   assert.equal(result.exitCode, 1);
 });
+
+test("error message lists a configured agent email on rejection", () => {
+  const config = { agents: { claude: { email: "noreply@anthropic.com", label: "Claude" } } };
+  const result = runGuardWithConfig("docs: x\n\nCo-authored-by: Nobody <nobody@example.com>\n", config);
+  assert.equal(result.exitCode, 1);
+  assert.match(result.stderr, /noreply@anthropic\.com/);
+});
+
+test("email containing regex metacharacters is matched literally (escaped)", () => {
+  // a contrived agent email with regex metachars must match itself exactly and NOT act as a pattern
+  const config = { agents: { weird: { email: "a+b(c)@x.com", label: "Weird" } } };
+  const accept = runGuardWithConfig("feat: y\n\nCo-authored-by: Weird <a+b(c)@x.com>\n", config);
+  assert.equal(accept.exitCode, 0, "exact metachar email should be accepted");
+  // a string that would match if metachars were treated as a pattern must be rejected
+  const reject = runGuardWithConfig("feat: y\n\nCo-authored-by: Spoof <abc@x.com>\n", config);
+  assert.equal(reject.exitCode, 1, "pattern-interpretation spoof must be rejected");
+});

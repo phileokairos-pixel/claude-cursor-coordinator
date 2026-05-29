@@ -21,8 +21,9 @@ try {
 const config = loadConfig();
 const emails = agentEmails(config);
 // Key matched case-insensitively (git treats trailer keys case-insensitively); email matched exactly.
-const ok = emails.some(email => {
-  const re = new RegExp(`^Co-authored-by:\\s*[^<]*<${email.replace(/[.+]/g, "\\$&")}>\\s*$`, "im");
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const ok = emails.some((email) => {
+  const re = new RegExp(`^Co-authored-by:\\s*[^<]*<${escapeRe(email)}>\\s*$`, "im");
   return re.test(trailers);
 });
 
