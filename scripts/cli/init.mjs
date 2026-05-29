@@ -41,9 +41,9 @@ if (!existsSync(cfgPath) || force) {
 }
 
 try {
-  execFileSync("bun", [join(dest, "scripts/gen-rules.ts")], { cwd: dest, stdio: "inherit" });
+  execFileSync("bun", ["scripts/gen-rules.ts"], { cwd: dest, stdio: "inherit", shell: true });
 } catch {
-  console.log("Note: run `bun scripts/gen-rules.ts` once Bun is installed.");
+  console.log("Note: rule generation skipped. Run `bun scripts/gen-rules.ts` (install Bun if needed).");
 }
 
 console.log("\n✓ Coordinator installed. Commit with a Co-authored-by trailer; see .gitmessage.");
