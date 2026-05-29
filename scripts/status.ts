@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { readFileSync, existsSync } from "node:fs";
+import { recentActivity } from "./lib/activity.mjs";
 
 function git(...args: string[]): string {
   try {
@@ -30,28 +30,10 @@ if (uncommitted) {
 }
 
 console.log("\n--- recent activity (per tool) ---");
-
-if (existsSync(".coordination/recent.jsonl")) {
-  const lines = readFileSync(".coordination/recent.jsonl", "utf8")
-    .trim()
-    .split("\n")
-    .slice(-20)
-    .map(l => {
-      try {
-        return JSON.parse(l);
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean);
-
-  const cursorEntries = lines.filter(e => e.tool === "cursor").slice(-5);
-  const claudeEntries = lines.filter(e => e.tool === "claude").slice(-5);
-
-  console.log("Cursor:");
-  cursorEntries.forEach(e => console.log(`  ${e.hash.slice(0, 7)} ${e.subject}`));
-  console.log("Claude:");
-  claudeEntries.forEach(e => console.log(`  ${e.hash.slice(0, 7)} ${e.subject}`));
+const items = recentActivity(process.cwd(), { sinceDays: 14 });
+for (const tool of [...new Set(items.map((i) => i.tool))]) {
+  console.log(`${tool}:`);
+  items.filter((i) => i.tool === tool).slice(0, 5).forEach((e) => console.log(`  ${e.hash.slice(0, 7)} ${e.subject}`));
 }
 
 console.log("\n--- open PRs ---");
