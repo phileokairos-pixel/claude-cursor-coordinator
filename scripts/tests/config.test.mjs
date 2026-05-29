@@ -14,25 +14,34 @@ function tmp(contents) {
 
 test("missing config falls back to default agents (fail-safe, not fail-open)", () => {
   const dir = tmp(undefined);
-  const cfg = loadConfig(dir);
-  assert.deepEqual(cfg.agents, DEFAULT_AGENTS);
-  assert.ok(agentEmails(cfg).includes("noreply@anthropic.com"));
-  assert.ok(agentEmails(cfg).length >= 2);
-  rmSync(dir, { recursive: true, force: true });
+  try {
+    const cfg = loadConfig(dir);
+    assert.deepEqual(cfg.agents, DEFAULT_AGENTS);
+    assert.ok(agentEmails(cfg).includes("noreply@anthropic.com"));
+    assert.ok(agentEmails(cfg).length >= 2);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("malformed JSON falls back to defaults and never throws", () => {
   const dir = tmp("{ not json ");
-  const cfg = loadConfig(dir);
-  assert.ok(agentEmails(cfg).length >= 2);
-  rmSync(dir, { recursive: true, force: true });
+  try {
+    const cfg = loadConfig(dir);
+    assert.ok(agentEmails(cfg).length >= 2);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("config with empty agents object falls back (never fail-open)", () => {
   const dir = tmp(JSON.stringify({ agents: {} }));
-  const cfg = loadConfig(dir);
-  assert.ok(agentEmails(cfg).length >= 2);
-  rmSync(dir, { recursive: true, force: true });
+  try {
+    const cfg = loadConfig(dir);
+    assert.ok(agentEmails(cfg).length >= 2);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("valid config is read and supports a third agent", () => {
@@ -43,8 +52,32 @@ test("valid config is read and supports a third agent", () => {
       codex:  { email: "codex@openai.com", label: "Codex" },
     },
   }));
-  const cfg = loadConfig(dir);
-  assert.equal(toolForEmail(cfg, "codex@openai.com"), "codex");
-  assert.equal(toolForEmail(cfg, "unknown@x.com"), "unknown");
-  rmSync(dir, { recursive: true, force: true });
+  try {
+    const cfg = loadConfig(dir);
+    assert.equal(toolForEmail(cfg, "codex@openai.com"), "codex");
+    assert.equal(toolForEmail(cfg, "unknown@x.com"), "unknown");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("array-shaped agents falls back to defaults (no numeric keys)", () => {
+  const dir = tmp(JSON.stringify({ agents: [{ email: "x@y.com" }] }));
+  try {
+    const cfg = loadConfig(dir);
+    assert.deepEqual(cfg.agents, DEFAULT_AGENTS);
+    assert.equal(toolForEmail(cfg, "x@y.com"), "unknown");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("null agent entry falls back to defaults", () => {
+  const dir = tmp(JSON.stringify({ agents: { claude: null } }));
+  try {
+    const cfg = loadConfig(dir);
+    assert.deepEqual(cfg.agents, DEFAULT_AGENTS);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

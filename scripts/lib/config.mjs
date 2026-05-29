@@ -12,7 +12,7 @@ export const DEFAULT_SCOPES = {
 };
 
 function isNonEmptyAgents(agents) {
-  return agents && typeof agents === "object" && Object.keys(agents).length > 0
+  return agents && typeof agents === "object" && !Array.isArray(agents) && Object.keys(agents).length > 0
     && Object.values(agents).every(a => a && typeof a.email === "string" && a.email.includes("@"));
 }
 
