@@ -60,6 +60,8 @@ A small shared loader (`scripts/lib/config.mjs` + a `.ts` re-export) reads and v
 - **`.gitmessage`** and the **`AGENTS.md` attribution block** are *generated* by `gen:rules` from `config.agents`, removing the 4th/5th hardcoded copies.
 - **`gen-rules.ts`** reads `config.scopes` instead of its hardcoded `scopeGlobs` map.
 
+**Bonus correctness fix (discovered during this brainstorm):** the trailer regex in `commit-msg-guard.mjs` and `trailer-guard.yml` is case-*sensitive* (`Co-authored-by:`), so a valid `Co-Authored-By:` trailer — the casing GitHub's UI and many tools emit — is wrongly rejected. `git interpret-trailers` matches trailer keys case-insensitively; the guards must too. Add the `i` flag (JS) / `-i` (grep) when matching the `Co-authored-by` key, while keeping the email match exact.
+
 ### 3. N-agent support
 
 Because identity is config-driven, adding an agent (e.g. `"codex": { "email": "codex@openai.com", "label": "Codex" }`) is a one-line edit; both enforcement points and all generated artifacts update on next `gen:rules`. This is a headline feature for an AGENTS.md-standard tool.
