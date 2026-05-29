@@ -140,6 +140,23 @@ test("generates .gitmessage from config agents", () => {
   }
 });
 
+test("scope config without description falls back to '<scope> scope'", () => {
+  const config = {
+    agents: { claude: { email: "noreply@anthropic.com", label: "Claude" } },
+    scopes: { go: { globs: ["**/*.go"], priority: 150 } }, // no description
+  };
+  const agentsMd = "# AGENTS\n\nCanonical.\n\n<!-- @scope: go -->\nUse gofmt.\n<!-- @endscope -->\n";
+  const dir = setupCustom(config, agentsMd);
+  try {
+    runGen(dir);
+    const mdc = readFileSync(join(dir, ".cursor/rules/150-go.mdc"), "utf8");
+    assert.match(mdc, /description: go scope/);
+    assert.doesNotMatch(mdc, /description: undefined/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("scope mdc globs come from config, not a hardcoded map", () => {
   const config = {
     agents: { claude: { email: "noreply@anthropic.com", label: "Claude" } },

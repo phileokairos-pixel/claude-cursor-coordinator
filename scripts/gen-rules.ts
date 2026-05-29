@@ -79,7 +79,7 @@ function main() {
     const globs: string[] | undefined = scopeConfig.globs;
 
     const filename = `${String(priority).padStart(3, "0")}-${section.scope}.mdc`;
-    const lines = [`description: ${scopeConfig.description}`];
+    const lines = [`description: ${scopeConfig.description ?? `${section.scope} scope`}`];
 
     if (globs) {
       lines.push("globs:");
