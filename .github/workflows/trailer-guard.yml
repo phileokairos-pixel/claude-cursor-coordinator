@@ -14,34 +14,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verify all commits have Co-authored-by trailer
+      - name: Verify all commits have a known Co-authored-by trailer
         run: |
+          EMAILS=$(jq -r '.agents[].email' coordinator.config.json 2>/dev/null)
+          if [ -z "$EMAILS" ]; then
+            EMAILS=$'noreply@anthropic.com\ncursoragent@cursor.com'
+          fi
+          PATTERN=$(printf '%s\n' "$EMAILS" | sed 's/[.[\*^${}()|+?]/\\&/g' | paste -sd '|' -)
           BASE_SHA="${{ github.event.pull_request.base.sha || github.event.before }}"
           HEAD_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
-
           if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ]; then
             BASE_SHA=$(git rev-list --max-parents=0 HEAD | tail -1)
           fi
-
           MISSING=0
           for SHA in $(git rev-list "$BASE_SHA".."$HEAD_SHA"); do
             MSG=$(git log -1 --pretty=%B "$SHA")
-
-            # Skip merge / revert commits
             if echo "$MSG" | head -1 | grep -qE "^(Merge|Revert) "; then
               continue
             fi
-
             TRAILERS=$(echo "$MSG" | git interpret-trailers --parse)
-
-            # Trust email as identity (matches commit-msg-guard pattern)
-            if ! echo "$TRAILERS" | grep -qE "^Co-authored-by: .*<(cursoragent@cursor\.com|noreply@anthropic\.com)>$"; then
-              echo "::error::Commit $SHA missing 'Co-authored-by: Cursor' or 'Co-authored-by: Claude' trailer"
+            if ! echo "$TRAILERS" | grep -qiE "^Co-authored-by: .*<($PATTERN)>$"; then
+              echo "::error::Commit $SHA missing known Co-authored-by trailer"
               echo "Subject: $(git log -1 --pretty=%s "$SHA")"
               MISSING=1
             fi
           done
-
           if [ $MISSING -eq 1 ]; then
             exit 1
           fi

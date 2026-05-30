@@ -1,0 +1,19 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+jobs:
+  test-and-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun test
+      - name: Assert no generated drift
+        run: |
+          bun gen:rules
+          git diff --exit-code CLAUDE.md .cursorrules .gitmessage .cursor/rules/ \
+            || (echo "::error::Generated files drifted. Run 'bun gen:rules' and commit." && exit 1)

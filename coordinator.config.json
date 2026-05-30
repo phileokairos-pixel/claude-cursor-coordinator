@@ -1,0 +1,12 @@
+{
+  "$schema": "./scripts/config.schema.json",
+  "agents": {
+    "claude": { "email": "noreply@anthropic.com", "label": "Claude" },
+    "cursor": { "email": "cursoragent@cursor.com", "label": "Cursor" }
+  },
+  "scopes": {
+    "php":          { "globs": ["**/*.php"],            "priority": 100, "description": "PHP / Laravel conventions" },
+    "react":        { "globs": ["**/*.tsx", "**/*.ts"], "priority": 200, "description": "React / TypeScript / TSX conventions" },
+    "coordination": { "alwaysApply": true,              "priority": 300, "description": "Coordination protocol for Claude+Cursor" }
+  }
+}

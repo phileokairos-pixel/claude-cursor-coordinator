@@ -1,11 +1,13 @@
 {
     "$schema": "https://www.schemastore.org/package.json",
     "name": "claude-cursor-coordinator",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "description": "Coordination system for Claude + Cursor working on the same codebase. Commit attribution, drift prevention, audit trail.",
     "private": false,
     "type": "module",
     "packageManager": "bun@1.3.11",
+    "bin": { "claude-cursor-coordinator": "scripts/cli/init.mjs" },
+    "files": ["scripts", ".husky", ".coordination/INDEX.md", ".coordination/HANDOFF.md", ".cursor", ".claude", ".github", "AGENTS.md", "coordinator.config.json", "docs", ".gitattributes", ".gitmessage", "LICENSE", "README.md"],
     "scripts": {
         "gen:rules": "bun scripts/gen-rules.ts",
         "prepare": "husky",
